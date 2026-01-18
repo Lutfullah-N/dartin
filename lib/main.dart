@@ -41,10 +41,8 @@ class MyApp extends StatelessWidget {
             );
           }
           if (snapshot.hasData) {
-            // ✅ User is logged in
             return const HomePage();
           } else {
-            // ✅ User is not logged in
             return const LoginView();
           }
         },

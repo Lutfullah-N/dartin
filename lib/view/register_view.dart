@@ -35,9 +35,22 @@ class _RegisterViewState extends State<RegisterView> {
     final password = _password.text.trim();
     final confirmPassword = _confirmPassword.text.trim();
 
+    // Basic validations
     if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Email and password required')),
+      );
+      return;
+    }
+    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(email)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Invalid email format')),
+      );
+      return;
+    }
+    if (password.length < 6) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Password must be at least 6 characters')),
       );
       return;
     }
@@ -56,12 +69,26 @@ class _RegisterViewState extends State<RegisterView> {
         password: password,
       );
       debugPrint('Registered: $email');
+
+      // Optional: show success feedback
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Registered successfully!')),
+        );
+      }
+
+      // Navigation is optional because authStateChanges in main.dart will route to HomePage
       if (!mounted) return;
       Navigator.of(context).pushReplacementNamed('/home');
     } on FirebaseAuthException catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error: ${e.message}')),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Something went wrong. Please try again.')),
       );
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -76,20 +103,39 @@ class _RegisterViewState extends State<RegisterView> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            TextField(controller: _email, decoration: const InputDecoration(hintText: 'Email')),
-            TextField(controller: _password, decoration: const InputDecoration(hintText: 'Password'), obscureText: true),
-            TextField(controller: _confirmPassword, decoration: const InputDecoration(hintText: 'Confirm Password'), obscureText: true),
+            TextField(
+              controller: _email,
+              keyboardType: TextInputType.emailAddress,
+              decoration: const InputDecoration(hintText: 'Email'),
+            ),
+            TextField(
+              controller: _password,
+              decoration: const InputDecoration(hintText: 'Password'),
+              obscureText: true,
+            ),
+            TextField(
+              controller: _confirmPassword,
+              decoration: const InputDecoration(hintText: 'Confirm Password'),
+              obscureText: true,
+            ),
             const SizedBox(height: 20),
             _isLoading
                 ? const CircularProgressIndicator()
-                : ElevatedButton(onPressed: _register, child: const Text('Register')),
+                : ElevatedButton(
+                    onPressed: _register,
+                    child: const Text('Register'),
+                  ),
           ],
         ),
       ),
       bottomNavigationBar: BottomAppBar(
-        child: TextButton(
-          onPressed: () => Navigator.of(context).pushReplacementNamed('/login'),
-          child: const Text('Already registered? Login here!'),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: TextButton(
+            onPressed: () =>
+                Navigator.of(context).pushReplacementNamed('/login'),
+            child: const Text('Already registered? Login here!'),
+          ),
         ),
       ),
     );

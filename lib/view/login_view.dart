@@ -46,6 +46,7 @@ class _LoginViewState extends State<LoginView> {
         password: password,
       );
       debugPrint('Logged in: $email');
+      // Navigation is optional because StreamBuilder in main.dart handles auth state
       if (!mounted) return;
       Navigator.of(context).pushReplacementNamed('/home');
     } on FirebaseAuthException catch (e) {
@@ -66,8 +67,15 @@ class _LoginViewState extends State<LoginView> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            TextField(controller: _emailController, decoration: const InputDecoration(hintText: 'Email')),
-            TextField(controller: _passwordController, decoration: const InputDecoration(hintText: 'Password'), obscureText: true),
+            TextField(
+              controller: _emailController,
+              decoration: const InputDecoration(hintText: 'Email'),
+            ),
+            TextField(
+              controller: _passwordController,
+              decoration: const InputDecoration(hintText: 'Password'),
+              obscureText: true,
+            ),
             const SizedBox(height: 20),
             _isLoading
                 ? const CircularProgressIndicator()
@@ -77,7 +85,8 @@ class _LoginViewState extends State<LoginView> {
       ),
       bottomNavigationBar: BottomAppBar(
         child: TextButton(
-          onPressed: () => Navigator.of(context).pushReplacementNamed('/register'),
+          onPressed: () =>
+              Navigator.of(context).pushReplacementNamed('/register'),
           child: const Text('Don’t have an account? Register here!'),
         ),
       ),
